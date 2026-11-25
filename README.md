@@ -1,4 +1,4 @@
-Dependencias do projeto.
+Dependencias do projeto:
 pip install requests
 pip install python-dotenv
 pip install selenium
