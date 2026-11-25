@@ -13,15 +13,16 @@ url = os.getenv("pagina")
 selecao = os.getenv("selecao")
 ntfy = os.getenv("ntfy")
 discord = os.getenv("discord")
-tituloNTFY = os.getenv("tituloNTFY")
+titulo = os.getenv("titulo")
 modo = os.getenv("modo")
 
 def ntfy_notificar(texto):
-    requests.post(f"https://ntfy.sh/{ntfy}", data=texto.encode("utf-8"), headers={"Title": tituloNTFY}, timeout=10)
+    requests.post(f"https://ntfy.sh/{ntfy}", data=texto.encode("utf-8"), headers={"Title": titulo}, timeout=10)
 
 def discord_notificar(texto):
     mensagem = {
-    'text': f"{texto}"
+    'content': f"{texto}",
+    'username': f"{titulo}"
     }
     headers = {'Content-Type': 'application/json; charset=UTF-8'}
     requests.post(discord, data=json.dumps(mensagem), headers=headers)
@@ -32,13 +33,17 @@ def enviar_notificacao(texto):
     else:
         discord_notificar(texto)
 
+def extrair_conteudo(driver):
+    elementos = driver.find_elements(By.CSS_SELECTOR, selecao)
+    return " ".join(" ".join(e.text.split()) for e in elementos)
+
 def verificar_atualizacao():
     configuracoes = Options()
     configuracoes.add_argument("--headless=new")
     driver = webdriver.Chrome(options=configuracoes)
     driver.get(url)
     conteudo2 = ""
-    conteudo = driver.find_elements(by=By.CSS_SELECTOR, value=selecao)
+    conteudo = extrair_conteudo(driver)
     driver.quit()
     while True:
         try:
@@ -47,13 +52,13 @@ def verificar_atualizacao():
             if resposta.status_code == 200:
                 driver = webdriver.Chrome(options=configuracoes)
                 driver.get(url)
-                conteudo2 = driver.find_elements(by=By.CSS_SELECTOR, value=selecao)
+                conteudo2 = extrair_conteudo(driver)
                 # print("seleção1:")
                 # print(conteudo[0])
                 # print("seleção2:")
                 # print(conteudo2[0])
                 if conteudo[0] != conteudo2[0]:
-                    conteudo = driver.find_elements(by=By.CSS_SELECTOR, value=selecao)
+                    conteudo = conteudo2
                     print(f"Foi atualizado. | {datetime.now()}")
                     enviar_notificacao(f"Foi atualizado. | {datetime.now()}")
                     winsound.Beep(1000, 200)
