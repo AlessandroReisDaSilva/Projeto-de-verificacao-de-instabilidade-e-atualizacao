@@ -1,3 +1,8 @@
+Dependencias do projeto.
+pip install requests
+pip install python-dotenv
+pip install selenium
+
 Crie um arquivo .env, coloque os valores em baixo e altere.
 
 titulo="Titulo"
